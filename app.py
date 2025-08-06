@@ -14,18 +14,13 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
-# --- NEW: Import to serve the HTML file ---
+# --- Import to serve the HTML file ---
 from fastapi.responses import FileResponse
-
-# --- 0. OCR CONFIGURATION ---
-# On Render, Tesseract will be installed via a build script and be in the system PATH.
-# The local Windows path is no longer needed.
 
 # --- 1. API CONFIGURATION ---
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
-    # In a production environment, this should be a fatal error.
     raise ValueError("GOOGLE_API_KEY not found. Please set it as an environment variable on Render.")
 
 genai.configure(api_key=GOOGLE_API_KEY)
@@ -34,7 +29,7 @@ print("Gemini API configured successfully.")
 # --- 2. MODEL INITIALIZATION ---
 print("Initializing Gemini models...")
 embedding_model_name = 'models/text-embedding-004'
-llm_model_name = 'gemini-1.5-flash-latest'
+llm_model_name = 'gemini-1.5-flash-latest' 
 print(f"Using LLM: {llm_model_name}")
 
 embedding_model = genai.GenerativeModel(embedding_model_name)
@@ -46,7 +41,6 @@ print("Gemini models initialized.")
 app = FastAPI()
 
 # --- Global state (for simplicity) ---
-# This simple state is fine for a single-user demo on Render's free tier.
 document_state = {
     "text_chunks": None,
     "chunk_embeddings": None,
@@ -65,13 +59,13 @@ app.add_middleware(
 class Question(BaseModel):
     text: str
 
-# --- 4. CORE LOGIC (Adapted for the web server) ---
+# --- 4. CORE LOGIC ---
 
 def process_and_embed_pdf(pdf_content: bytes, filename: str):
     """Processes the PDF content, chunks, and embeds it."""
     global document_state
     print(f"Processing PDF: {filename}")
-
+    
     try:
         doc = fitz.open(stream=pdf_content, filetype="pdf")
         full_text = "".join(page.get_text("text") for page in doc)
@@ -101,7 +95,7 @@ def process_and_embed_pdf(pdf_content: bytes, filename: str):
             batch = chunks[i:i + batch_size]
             response = genai.embed_content(model=embedding_model_name, content=batch)
             all_embeddings.extend(response['embedding'])
-
+        
         document_state["text_chunks"] = chunks
         document_state["chunk_embeddings"] = np.array(all_embeddings)
         document_state["filename"] = filename
@@ -115,7 +109,6 @@ def process_and_embed_pdf(pdf_content: bytes, filename: str):
 
 # --- 5. API ENDPOINTS ---
 
-# --- NEW: Endpoint to serve the HTML frontend ---
 @app.get("/")
 async def read_root():
     return FileResponse('index.html')
@@ -162,19 +155,19 @@ async def ask_question(question: Question):
 
         **Answer:**
         """
-
+        
         generation_config = genai.types.GenerationConfig(
             max_output_tokens=2048,
             temperature=0.25
         )
-
+        
         response = llm_model.generate_content(prompt, generation_config=generation_config)
-
+        
         if response.parts:
             answer = response.text.strip()
         else:
             answer = "The model did not provide a response. This might be due to a safety filter or an issue with the prompt."
-
+        
         print(f"Generated answer: {answer}")
         return {"answer": answer}
 
@@ -184,6 +177,4 @@ async def ask_question(question: Question):
 
 # --- 6. RUN THE SERVER ---
 if __name__ == "__main__":
-    # This allows the script to be run directly for development.
-    # For production, you would use a command like: uvicorn main:app --host 0.0.0.0 --port 8000
     uvicorn.run(app, host="127.0.0.1", port=8000)
