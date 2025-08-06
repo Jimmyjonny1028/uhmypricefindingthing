@@ -19,4 +19,5 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 8000
 
-# The command to run the application will be provided by Render's Start Command
+# NEW: The command to run when the container launches
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
