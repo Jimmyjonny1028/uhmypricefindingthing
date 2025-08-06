@@ -4,6 +4,8 @@ services:
     runtime: docker
     # Tells Render to use the Dockerfile in your repository
     dockerfilePath: ./Dockerfile
+    # Add this line to ensure you are on the free plan
+    plan: free
     # Tells Render to automatically use the port from the Dockerfile
     autoDeploy: false
     envVars:
