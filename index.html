@@ -29,10 +29,12 @@
                 <label for="pdf-upload" class="cursor-pointer bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
                     📁 Upload PDF
                 </label>
-                <input id="pdf-upload" type="file" class="hidden" accept=".pdf" onchange="uploadPDF()">
+                <!-- REMOVED onchange from here -->
+                <input id="pdf-upload" type="file" class="hidden" accept=".pdf">
             </div>
             <input type="text" id="message-input" class="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ask a question about the PDF..." disabled>
-            <button id="send-button" class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors" onclick="sendMessage()" disabled>Send</button>
+            <!-- REMOVED onclick from here -->
+            <button id="send-button" class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors" disabled>Send</button>
         </div>
     </footer>
 
@@ -115,4 +117,26 @@
                     throw new Error(result.detail || 'Failed to get an answer.');
                 }
                 
-                addMessage(
+                addMessage(result.answer, 'ai');
+
+            } catch (error) {
+                addMessage(`Error: ${error.message}`, 'ai');
+            } finally {
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        // --- NEW: Attach event listeners programmatically ---
+        pdfUploadInput.addEventListener('change', uploadPDF);
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+    </script>
+</body>
+</html>
