@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local ChatPDF Server</title>
+    <title>ChatPDF Server</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -43,10 +43,10 @@
         const pdfUploadInput = document.getElementById('pdf-upload');
         const statusElement = document.getElementById('status');
         
-        // --- IMPORTANT ---
-        // When running locally, this is correct. When deployed to Render,
-        // you will delete this line and the server will figure out the URL automatically.
-        const SERVER_URL = 'http://127.0.0.1:8000'; 
+        // --- THIS IS THE CRUCIAL CHANGE ---
+        // This makes the script automatically use the correct server address,
+        // whether it's local (http://127.0.0.1:8000) or live on Render.
+        const SERVER_URL = window.location.origin; 
 
         function addMessage(text, sender) {
             const bubble = document.createElement('div');
