@@ -1,21 +1,14 @@
 services:
-  # A background worker to install system dependencies like Tesseract
-  - type: worker
-    name: tesseract-installer
-    runtime: native
-    # This command runs once during the first build.
-    startCommand: "apt-get update && apt-get install -y tesseract-ocr"
-    # We don't need this worker to run after installation.
-    autoDeploy: false
-
-  # Your main web service
   - type: web
     name: chatpdf-server
-    runtime: python
-    plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn app:app --host 0.0.0.0 --port $PORT"
+    runtime: docker
+    # Tells Render to use the Dockerfile in your repository
+    dockerfilePath: ./Dockerfile
+    # Tells Render to automatically use the port from the Dockerfile
+    autoDeploy: false
     envVars:
+      - key: PORT
+        value: 8000
       - key: GOOGLE_API_KEY
-        # This will sync from the secret file you create in the next step
-        fromSecretFile: ./gemini_api_key.txt
+        # This ensures the value is taken from your secret settings
+        sync: false
