@@ -43,9 +43,6 @@
         const pdfUploadInput = document.getElementById('pdf-upload');
         const statusElement = document.getElementById('status');
         
-        // --- THIS IS THE CRUCIAL CHANGE ---
-        // This makes the script automatically use the correct server address,
-        // whether it's local (http://127.0.0.1:8000) or live on Render.
         const SERVER_URL = window.location.origin; 
 
         function addMessage(text, sender) {
@@ -118,23 +115,4 @@
                     throw new Error(result.detail || 'Failed to get an answer.');
                 }
                 
-                addMessage(result.answer, 'ai');
-
-            } catch (error) {
-                addMessage(`Error: ${error.message}`, 'ai');
-            } finally {
-                messageInput.disabled = false;
-                sendButton.disabled = false;
-                messageInput.focus();
-            }
-        }
-
-        messageInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-    </script>
-</body>
-</html>
+                addMessage(
